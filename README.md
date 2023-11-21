@@ -166,7 +166,7 @@ Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/la
     kubectl get svc -n istio-system
     ```
   
-    ```shell
+    ```text
     NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
     istiod                 ClusterIP      10.43.33.239    <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP        78m
     istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/TCP,80:30279/TCP,443:31788/TCP   78m
@@ -180,12 +180,48 @@ Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/la
 
 - Adicione um rótulo de namespace para instruir o Istio a injetar automaticamente proxies secundários quando você implantar seu aplicativo posteriormente:
 
-  - ```shell
-    kubectl label namespace default istio-injection=enabled
-    ```
+```shell
+kubectl label namespace default istio-injection=enabled
+```
 
-- 
+- Crie um `deployment` conforme exemplo abaixo:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+#  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+```
 
+- Aplique o `deployment`:
+```shell
+kubectl apply -f src/github/k8s/deployment.yaml 
+```
 
+- Veja a saida com o comando abaixo:
+```shell
+kubectl get pod
+```
 
 ---
