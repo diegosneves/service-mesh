@@ -63,7 +63,7 @@ kubectl get nodes
 ```
 
 *Saída da tela:*
-```shell
+```textmate
 NAME                       STATUS   ROLES                  AGE     VERSION
 k3d-k3s-default-server-0   Ready    control-plane,master   8m32s   v1.27.4+k3s1
 k3d-k3s-default-agent-0    Ready    <none>                 8m30s   v1.27.4+k3s1
@@ -82,47 +82,47 @@ Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/la
 
 - Download:
 
-  - ```shell
-    curl -L https://istio.io/downloadIstio | sh -
-    ```
+  ```shell
+  curl -L https://istio.io/downloadIstio | sh -
+  ```
 
 - Adicione o cliente istioctl ao seu caminho (Linux):
 
-  - ```shell
-    export PATH=$PATH:~/istio-1.20.0/bin
+  ```shell
+  export PATH=$PATH:~/istio-1.20.0/bin
+  ```
+
+  ```shell
+  source ~/.bashrc
+  ```
+
+- Após escolher o [perfil](https://istio.io/latest/docs/setup/getting-started/#install)(ou deixe em branco para _default_) execute o comando para instalação:
+
+  ```shell
+  istioctl install -y
+  ```
+  - Exemplo de perfil `demo`:
+
+    ```textmate
+    istioctl install --set profile=demo -y
+    ✔ Istio core installed
+    ✔ Istiod installed
+    ✔ Egress gateways installed
+    ✔ Ingress gateways installed
+    ✔ Installation complete
     ```
-
-  - ```shell
-    source ~/.bashrc
-    ```
-
-- Após escolher o [perfil](https://istio.io/latest/docs/setup/getting-started/#install) execute o comando para instalação:
-
-  - ```shell
-    istioctl install -y
-    ```
-    - Exemplo de perfil `demo`:
-
-      - ```shell
-        istioctl install --set profile=demo -y
-        ✔ Istio core installed
-        ✔ Istiod installed
-        ✔ Egress gateways installed
-        ✔ Ingress gateways installed
-        ✔ Installation complete
-        ```
 
   
   
 - Validar instalação pelo terminal:
 
-  - ```shell
-    kubectl get ns
-    ```
+  ```shell
+  kubectl get ns
+  ```
 
     Ao usar o comando acima deve aparecer na lista o `istio-system` conforme exemplo abaixo:
 
-    ```shell
+    ```textmate
     NAME              STATUS   AGE
     default           Active   4h51m
     kube-system       Active   4h51m
@@ -132,47 +132,43 @@ Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/la
     ```
     
     
-    
   - Utilize o seguinte comando:
 
-  - ```shell
+    ```shell
     kubectl get pod -n istio-system
     ```
 
-    ```shell
+    ```textmate
     NAME                                    READY   STATUS    RESTARTS   AGE
     istiod-7d4885fc54-rrhgq                 1/1     Running   0          69m
     istio-ingressgateway-56558c9fd7-hbhxk   1/1     Running   0          69m
     ```
-    
-    
-    
-  - Seus pods serão exibidos na tela. 
+
+
+- Seus pods serão exibidos na tela. 
 
 - Outras validações:
 
-  - ```shell
-    kubectl get svc
-    ```
+  ```shell
+  kubectl get svc
+  ```
 
   deve ser exibido dados do service conforme exemplo abaixo:
 
-  ```shell
+  ```textmate
   NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
   kubernetes   ClusterIP   10.43.0.1    <none>        443/TCP   4h59m
   ```
 
-  - ```shell
-    kubectl get svc -n istio-system
-    ```
+  ```shell
+  kubectl get svc -n istio-system
+  ```
   
-    ```text
-    NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
-    istiod                 ClusterIP      10.43.33.239    <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP        78m
-    istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/TCP,80:30279/TCP,443:31788/TCP   78m
-    ```
-
-
+  ```textmate
+  NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                      AGE
+  istiod                 ClusterIP      10.43.33.239    <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP        78m
+  istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/TCP,80:30279/TCP,443:31788/TCP   78m
+  ```
 
 ---
 
@@ -180,9 +176,9 @@ Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/la
 
 - Adicione um rótulo de namespace para instruir o Istio a injetar automaticamente proxies secundários quando você implantar seu aplicativo posteriormente:
 
-```shell
-kubectl label namespace default istio-injection=enabled
-```
+  ```shell
+  kubectl label namespace default istio-injection=enabled
+  ```
 
 - Crie um `deployment` conforme exemplo abaixo:
 ```yaml
@@ -215,13 +211,81 @@ spec:
 ```
 
 - Aplique o `deployment`:
-```shell
-kubectl apply -f src/github/k8s/deployment.yaml 
-```
+  ```shell
+  kubectl apply -f src/github/k8s/deployment.yaml 
+  ```
 
 - Veja a saida com o comando abaixo:
+  ```shell
+  kubectl get pod
+  ```
+
+---
+
+## Configurando Addons:
+
+- [Istio Integration](https://istio.io/latest/docs/ops/integrations/) possi tambem infos para configurar o [cert-manager](https://istio.io/latest/docs/ops/integrations/certmanager/)
+
+- Para adicionar alguns addons para telemetria, basta encontrar na propria [doc do Istio](https://istio.io/latest/docs/setup/getting-started/#dashboard) o link para [Istio Integration](https://istio.io/latest/docs/ops/integrations/).
+  - [Kiali](https://istio.io/latest/docs/ops/integrations/kiali/)
+  ```shell
+  kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/kiali.yaml
+  ```
+  - [Grafana](https://istio.io/latest/docs/ops/integrations/grafana/)
+  ```shell
+  kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/grafana.yaml
+  ```
+  - [Prometheus](https://istio.io/latest/docs/ops/integrations/prometheus/)
+  ```shell
+  kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/prometheus.yaml
+  ```
+  - [Jaeger](https://istio.io/latest/docs/ops/integrations/jaeger/)
+  ```shell
+  kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/jaeger.yaml
+  ```
+para o exemplo desse projeto foi utilizado esses quatros addons.
+
 ```shell
-kubectl get pod
+kubectl get pod -n istio-system
+```
+
+```textmate
+NAME                                    READY   STATUS    RESTARTS        AGE
+istiod-7d4885fc54-rrhgq                 1/1     Running   1 (7h34m ago)   19h
+istio-ingressgateway-56558c9fd7-hbhxk   1/1     Running   1 (7h34m ago)   19h
+kiali-cc67f8648-wbp8k                   1/1     Running   0               16m
+grafana-5f9b8c6c5d-dqxcn                1/1     Running   0               16m
+prometheus-5d5d6d6fc-txhrm              2/2     Running   0               15m
+jaeger-db6bdfcb4-jjrbn                  1/1     Running   0               15m
+```
+
+```shell
+kubectl get svc -n istio-system
+```
+
+```text
+NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                          AGE
+istiod                 ClusterIP      10.43.33.239    <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP            19h
+istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/TCP,80:30279/TCP,443:31788/TCP       19h
+kiali                  ClusterIP      10.43.91.134    <none>        20001/TCP,9090/TCP                               100s
+grafana                ClusterIP      10.43.9.55      <none>        3000/TCP                                         76s
+prometheus             ClusterIP      10.43.139.253   <none>        9090/TCP                                         53s
+tracing                ClusterIP      10.43.62.51     <none>        80/TCP,16685/TCP                                 37s
+zipkin                 ClusterIP      10.43.7.76      <none>        9411/TCP                                         37s
+jaeger-collector       ClusterIP      10.43.65.194    <none>        14268/TCP,14250/TCP,9411/TCP,4317/TCP,4318/TCP   37s
 ```
 
 ---
+
+## Obervabilidade:
+
+### - [Kiali](https://istio.io/latest/docs/tasks/observability/kiali/):
+
+- Para abrir a interface do Kiali, execute o seguinte comando em seu ambiente Kubernetes:
+  ```shell
+  istioctl dashboard kiali
+  ```
+![kiali](https://istio.io/latest/docs/tasks/observability/kiali/kiali-graph.png)
+
+---
+
