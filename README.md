@@ -289,3 +289,13 @@ jaeger-collector       ClusterIP      10.43.65.194    <none>        14268/TCP,14
 
 ---
 
+## Gerenciamento de tráfico:
+
+comando para auxiliar nas requests:
+
+```shell
+while true;do curl http://localhost:8000; echo; sleep 0.5; done;
+```
+Depois basta abrir o [Kiali](#--kiali) e verificar o trafico.
+
+---
