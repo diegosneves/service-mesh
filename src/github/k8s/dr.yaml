@@ -6,10 +6,16 @@ metadata:
     app: nginx-dr
 spec:
   host: nginx-service
+  trafficPolicy: # Essa linha de trafficPolicy nao é necessario se for usar o ROUND_ROBIN, pois esse algoritimo ja é o padrao.
+    loadBalancer: # O loadBalancer afeta os subsets que nao possuem uma config de trafficPolicy.
+      simple: ROUND_ROBIN # Esse envia trafico de forma igualitaria aos pods (Esse algoritimo afeta os subsets). Outra opcao é o RANDOM que envia o trafico aos pods de forma aleatoria.
   subsets:
     - name: v1
       labels:
         version: A
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_CONN # Esse algoritimo manda o trafico para os pods com menor fluxo.
     - name: v2
       labels:
         version: B
