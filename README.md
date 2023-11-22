@@ -289,7 +289,7 @@ jaeger-collector       ClusterIP      10.43.65.194    <none>        14268/TCP,14
 
 ---
 
-## Gerenciamento de tráfico:
+## Gerenciamento de tráfico (_[doc](https://istio.io/latest/docs/concepts/traffic-management/)_):
 
 comando para auxiliar nas requests:
 
@@ -297,5 +297,26 @@ comando para auxiliar nas requests:
 while true;do curl http://localhost:8000; echo; sleep 0.5; done;
 ```
 Depois basta abrir o [Kiali](#--kiali) e verificar o trafico.
+
+### [Fortio](https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/#adding-a-client):
+```shell
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/httpbin/sample-client/fortio-deploy.yaml
+```
+
+Comando para teste de stress:
+
+```shell
+kubectl exec fortio-deploy-5669d4866b-76wss -c fortio -- fortio load -c 2 -qps 0 -t 200s -loglevel Warning http://nginx-service:8000
+```
+
+> Para facilitar é possivel pegar o nome do pod do fortio para atraves de um export:
+> 
+>```shell
+>export FORTIO_POD=$(kubectl get pods -l app=fortio -o 'jsonpath={.items[0].metadata.name}')
+>```
+>isso evita ter que usar algo tipo `fortio-deploy-5669d4866b-76wss` para executar o comando.
+>```shell
+>kubectl exec "$FORTIO_POD" -c fortio -- fortio load -c 2 -qps 0 -t 200s -loglevel Warning http://nginx-service:8000
+>```
 
 ---
