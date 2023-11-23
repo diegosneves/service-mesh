@@ -386,17 +386,26 @@ As imagens Nginx para esse projeto terão apenas diferencas no `body` do html.
   </body>
   </html>
   ```
-  esse html iremos alterar o `body` onde um dos valores será `Diego A` e o outro `Diego B`. Isso servirá para realizar alguns testes.
+  > _Exemplo:_ Acima um `html` classico, mas para fins didaticos iremos abordar o exemplo abaixo
+  
+    ```html
+    Diego A
+    ```
+
+  esse `html` iremos alterar para que um dos valores seja `Diego A` e o outro `Diego B`. Isso servirá para realizar alguns testes.
 - Dockerfile
   ```yaml
+  # Use a imagem Nginx
   FROM nginx:latest
   LABEL authors="diegoneves"
-
-  COPY index.html /user/share/nginx/html/
-
+  
+  # Copie o arquivo index.html para o diretório padrão do Nginx
+  COPY index.html /usr/share/nginx/html/index.html
+  
+  # Exponha a porta 80
   EXPOSE 80
   ```
-  Vamos criar duas versões.
+#### Vamos criar duas versões:
 
 - Faca o login:
   ```shell
@@ -411,7 +420,7 @@ As imagens Nginx para esse projeto terão apenas diferencas no `body` do html.
   ```shell
   docker push diegoneves/nginx-sn:latest
   ```
-Agora altere o valor do `body` no index para `Diego B` e repita o processo alterando a tag `latest` para `b`.
+Agora altere o valor do `Diego A` no index para `Diego B` e repita o processo alterando a tag `latest` para `b`.
 
 
 ---
