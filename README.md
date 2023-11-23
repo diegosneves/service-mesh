@@ -320,3 +320,98 @@ kubectl exec fortio-deploy-5669d4866b-76wss -c fortio -- fortio load -c 2 -qps 0
 >```
 
 ---
+
+## Consistent Hash:
+
+Na config abaixo definimos que o `trafficPolicy` tera seu `loadBalancer` como um `consistentHash` para 'guardar' o header name(`httpHeaderName : "x-user"`).
+Isso enviara o usuario sempre para o mesmo pod.
+
+exemplo:
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vs
+  labels:
+    app: nginx-vs
+spec:
+  hosts:
+    - nginx-service
+  http:
+    - route:
+        - destination:
+            host: nginx-service
+            subset: all
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: nginx-dr
+  labels:
+    app: nginx-dr
+spec:
+  host: nginx-service
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-user" # Esse 'x-user' pode ser qualquer valor;
+  subsets:
+    - name: all
+      labels:
+        app: nginx
+```
+
+
+---
+
+## Docker
+Vamor criar uma imagem Nginx para utlizar nesse projeto:
+
+### NGINX:
+As imagens Nginx para esse projeto terão apenas diferencas no `body` do html.
+
+- index.html
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Página</title>
+  </head>
+  <body>
+    <h1>Diego A</h1>
+  </body>
+  </html>
+  ```
+  esse html iremos alterar o `body` onde um dos valores será `Diego A` e o outro `Diego B`. Isso servirá para realizar alguns testes.
+- Dockerfile
+  ```yaml
+  FROM nginx:latest
+  LABEL authors="diegoneves"
+
+  COPY index.html /user/share/nginx/html/
+
+  EXPOSE 80
+  ```
+  Vamos criar duas versões.
+
+- Faca o login:
+  ```shell
+  docker login
+  ```
+- build:
+  > Altere os valores necessarios `docker build -t seu-usuario-dockerhub/nome-imagem:tag .`
+  ```shell
+  docker build -t diegoneves/nginx-sn:latest .
+  ```
+  Após buildar, faca o `push` para o [DockerHub](https://hub.docker.com/) utilizando o seguinte comando:
+  ```shell
+  docker push diegoneves/nginx-sn:latest
+  ```
+Agora altere o valor do `body` no index para `Diego B` e repita o processo alterando a tag `latest` para `b`.
+
+
+---
