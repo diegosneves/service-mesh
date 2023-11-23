@@ -172,6 +172,65 @@ Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/la
 
 ---
 
+## Docker
+Vamor criar uma imagem Nginx para utlizar nesse projeto:
+
+### NGINX:
+As imagens Nginx para esse projeto terão apenas diferencas no `body` do html.
+
+- index.html
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Página</title>
+  </head>
+  <body>
+    <h1>Diego A</h1>
+  </body>
+  </html>
+  ```
+  > _Exemplo:_ Acima um `html` classico, mas para fins didaticos iremos abordar o exemplo abaixo
+  
+    ```html
+    Diego A
+    ```
+
+  esse `html` iremos alterar para que um dos valores seja `Diego A` e o outro `Diego B`. Isso servirá para realizar alguns testes.
+- Dockerfile
+  ```yaml
+  # Use a imagem Nginx
+  FROM nginx:latest
+  LABEL authors="diegoneves"
+  
+  # Copie o arquivo index.html para o diretório padrão do Nginx
+  COPY index.html /usr/share/nginx/html/index.html
+  
+  # Exponha a porta 80
+  EXPOSE 80
+  ```
+#### Vamos criar duas versões:
+
+- Faca o login:
+  ```shell
+  docker login
+  ```
+- build:
+  > Altere os valores necessarios `docker build -t seu-usuario-dockerhub/nome-imagem:tag .`
+  ```shell
+  docker build -t diegoneves/nginx-sn:latest .
+  ```
+  Após buildar, faca o `push` para o [DockerHub](https://hub.docker.com/) utilizando o seguinte comando:
+  ```shell
+  docker push diegoneves/nginx-sn:latest
+  ```
+Agora altere o valor do `Diego A` no index para `Diego B` e repita o processo alterando a tag `latest` para `b`.
+
+
+---
+
 ## Sidecar Proxy
 
 - Adicione um rótulo de namespace para instruir o Istio a injetar automaticamente proxies secundários quando você implantar seu aplicativo posteriormente:
@@ -201,7 +260,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx
+          image: diegoneves/nginx-sn:latest
           resources:
             limits:
               memory: "128Mi"
@@ -362,65 +421,73 @@ spec:
       labels:
         app: nginx
 ```
+Após aplicar `kubectl apply -f consistent-hash.yaml` já é possivel testar.
 
+Utilize o comando abaixo para conseguir o `NAME` de um `POD` Nginx.
+```shell
+kubectl get po
+```
 
----
+Acesse o terminal do `POD` selecionado conforme exemplo abaixo:
+```shell
+kubectl exec -it nginx-b-675b854866-45j42 -- bash
+```
 
-## Docker
-Vamor criar uma imagem Nginx para utlizar nesse projeto:
+Dentro do `POD` execute o comando abaixo varias vezes para verificar que a chamada altera entre os services Nginx.
+```shell
+curl http://nginx-service:8000 ; echo
+```
+```textmate
+root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
+Diego B
+```
 
-### NGINX:
-As imagens Nginx para esse projeto terão apenas diferencas no `body` do html.
-
-- index.html
-  ```html
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Página</title>
-  </head>
-  <body>
-    <h1>Diego A</h1>
-  </body>
-  </html>
-  ```
-  > _Exemplo:_ Acima um `html` classico, mas para fins didaticos iremos abordar o exemplo abaixo
-  
-    ```html
-    Diego A
-    ```
-
-  esse `html` iremos alterar para que um dos valores seja `Diego A` e o outro `Diego B`. Isso servirá para realizar alguns testes.
-- Dockerfile
-  ```yaml
-  # Use a imagem Nginx
-  FROM nginx:latest
-  LABEL authors="diegoneves"
-  
-  # Copie o arquivo index.html para o diretório padrão do Nginx
-  COPY index.html /usr/share/nginx/html/index.html
-  
-  # Exponha a porta 80
-  EXPOSE 80
-  ```
-#### Vamos criar duas versões:
-
-- Faca o login:
-  ```shell
-  docker login
-  ```
-- build:
-  > Altere os valores necessarios `docker build -t seu-usuario-dockerhub/nome-imagem:tag .`
-  ```shell
-  docker build -t diegoneves/nginx-sn:latest .
-  ```
-  Após buildar, faca o `push` para o [DockerHub](https://hub.docker.com/) utilizando o seguinte comando:
-  ```shell
-  docker push diegoneves/nginx-sn:latest
-  ```
-Agora altere o valor do `Diego A` no index para `Diego B` e repita o processo alterando a tag `latest` para `b`.
-
+Agora, ao utilizar o comando conforme exemplo abaixo a chamada devera ser direcionada sempre ao mesmo service Nginx.
+```shell
+curl --header "x-user: diego" http://nginx-service:8000 ; echo
+```
+```textmate
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
+Diego B
+```
+- Outro usuario:
+```textmate
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
+Diego A
+```
 
 ---
