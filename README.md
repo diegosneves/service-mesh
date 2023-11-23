@@ -1,5 +1,42 @@
 # Service Mesh [![wakatime](https://wakatime.com/badge/user/018bea20-dbbc-48e2-b101-5415903acf5a/project/018bf23f-423c-4bf1-b1d9-135ba7578aef.svg)](https://wakatime.com/@diegosneves/projects/otoebwtaou)
-Service Mesh com Istio
+
+### Service Mesh com Istio
+
+**Service Mesh:**
+Service Mesh (malha de serviço) é uma infraestrutura dedicada à comunicação, observabilidade e controle entre serviços em uma arquitetura de microsserviços. Ele fornece uma camada de controle que lida com funções como descoberta de serviço, balanceamento de carga, resiliência e segurança, permitindo que os desenvolvedores se concentrem mais na lógica de negócios do que nas preocupações operacionais relacionadas à comunicação entre serviços.
+
+Principais características da Service Mesh:
+
+1. **Descoberta de Serviço:** Automatiza a descoberta de serviços em um ambiente distribuído.
+
+2. **Balanceamento de Carga:** Distribui o tráfego de maneira equitativa entre várias instâncias de um serviço.
+
+3. **Resiliência:** Oferece mecanismos para tornar os sistemas mais resistentes a falhas, como retries, timeouts e circuit breakers.
+
+4. **Monitoramento e Observabilidade:** Facilita a coleta de métricas, logs e traces para fornecer insights sobre o desempenho do sistema.
+
+5. **Segurança:** Gerencia a comunicação segura entre os serviços e pode fornecer políticas de segurança, como autenticação e autorização.
+
+6. **Roteamento Avançado:** Possibilita roteamento condicional e regras avançadas de tráfego.
+
+**Istio:**
+Istio é uma implementação popular de uma Service Mesh de código aberto. Ele foi projetado para gerenciar a comunicação entre serviços em um ambiente de microsserviços e oferece uma série de recursos avançados para controlar e monitorar o tráfego entre esses serviços.
+
+Principais recursos do Istio:
+
+1. **Injeção Lado do Cliente (Envoy Proxy):** O Istio utiliza o Envoy Proxy para interceptar todas as comunicações entre os serviços. Ele é automaticamente injetado nos pods dos contêineres.
+
+2. **Balanceamento de Carga:** O Istio fornece balanceamento de carga e controle de tráfego, permitindo roteamento condicional e divisão de tráfego.
+
+3. **Monitoramento:** Integra-se a ferramentas populares, como Prometheus e Grafana, para fornecer monitoramento detalhado do tráfego e métricas do sistema.
+
+4. **Resiliência:** Oferece recursos como retries, timeouts e circuit breakers para tornar os sistemas mais resistentes a falhas.
+
+5. **Segurança:** Implementa políticas de segurança, como autenticação mútua e autorização baseada em regras.
+
+6. **Tracing:** Facilita a geração e visualização de traces para diagnóstico de problemas e análise de desempenho.
+
+O uso de uma Service Mesh como o Istio pode simplificar muitos dos desafios associados à comunicação entre serviços em uma arquitetura de microsserviços, proporcionando maior visibilidade e controle sobre a rede de serviços. No entanto, também adiciona complexidade ao ambiente e geralmente é mais benéfico em ambientes de microsserviços mais complexos.
 
 ---
 
