@@ -1,8 +1,8 @@
 # Service Mesh [![wakatime](https://wakatime.com/badge/user/018bea20-dbbc-48e2-b101-5415903acf5a/project/018bf23f-423c-4bf1-b1d9-135ba7578aef.svg)](https://wakatime.com/@diegosneves/projects/otoebwtaou)
 
-### Service Mesh com Istio
+### [Service Mesh com Istio](https://www.opus-software.com.br/insights/service-mesh-e-istio/)
 
-**Service Mesh:**
+[**Service Mesh:**](https://www.redhat.com/pt-br/topics/microservices/what-is-a-service-mesh)
 Service Mesh (malha de serviço) é uma infraestrutura dedicada à comunicação, observabilidade e controle entre serviços em uma arquitetura de microsserviços. Ele fornece uma camada de controle que lida com funções como descoberta de serviço, balanceamento de carga, resiliência e segurança, permitindo que os desenvolvedores se concentrem mais na lógica de negócios do que nas preocupações operacionais relacionadas à comunicação entre serviços.
 
 Principais características da Service Mesh:
@@ -19,7 +19,7 @@ Principais características da Service Mesh:
 
 6. **Roteamento Avançado:** Possibilita roteamento condicional e regras avançadas de tráfego.
 
-**Istio:**
+[**Istio:**](https://istio.io/)
 Istio é uma implementação popular de uma Service Mesh de código aberto. Ele foi projetado para gerenciar a comunicação entre serviços em um ambiente de microsserviços e oferece uma série de recursos avançados para controlar e monitorar o tráfego entre esses serviços.
 
 Principais recursos do Istio:
@@ -40,11 +40,10 @@ O uso de uma Service Mesh como o Istio pode simplificar muitos dos desafios asso
 
 ---
 
-## K3D:
+## [*K3D*](https://k3d.io/):
 
-Url: [*k3d*](https://k3d.io/)
 
-1) link de instalação:
+1) Comando para instalacao:
 
 ```shell
 wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
@@ -61,7 +60,7 @@ k3d cluster create -p "8000:30000@loadbalancer" --agents 2
 ```
 *Saida da tela:*
 
-```shell
+```textmate
 INFO[0000] portmapping '8000:30000' targets the loadbalancer: defaulting to [servers:*:proxy agents:*:proxy] 
 INFO[0000] Prep: Network                                
 INFO[0000] Created network 'k3d-k3s-default'            
@@ -109,10 +108,9 @@ k3d-k3s-default-agent-1    Ready    <none>                 8m30s   v1.27.4+k3s1
 
 ---
 
-## Istio:
+## [Istio](https://istio.io/):
 
-Url: [Istio](https://istio.io/)      |     Docs: [Istio Doc](https://istio.io/latest/docs/)
-
+[Documentacao](https://istio.io/latest/docs/)
 
 
 ### instalação:
@@ -229,7 +227,7 @@ As imagens Nginx para esse projeto terão apenas diferencas no `body` do html.
   </body>
   </html>
   ```
-  > _Exemplo:_ Acima um `html` classico, mas para fins didaticos iremos abordar o exemplo abaixo
+  > _Exemplo:_ Acima um `html` classico, mas para fins didáticos iremos abordar o exemplo abaixo
   
     ```html
     Diego A
@@ -477,12 +475,9 @@ curl http://nginx-service:8000 ; echo
 ```textmate
 root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
 Diego B
+
 root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
 Diego A
-root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
-Diego A
-root@nginx-b-675b854866-45j42:/# curl http://nginx-service:8000 ; echo
-Diego B
 ```
 
 Agora, ao utilizar o comando conforme exemplo abaixo a chamada devera ser direcionada sempre ao mesmo service Nginx.
@@ -492,20 +487,7 @@ curl --header "x-user: diego" http://nginx-service:8000 ; echo
 ```textmate
 root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
 Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
-Diego B
+
 root@nginx-b-675b854866-45j42:/# curl --header "x-user: diego" http://nginx-service:8000 ; echo
 Diego B
 ```
@@ -513,16 +495,7 @@ Diego B
 ```textmate
 root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
 Diego A
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
-Diego A
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
-Diego A
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
-Diego A
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
-Diego A
-root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
-Diego A
+
 root@nginx-b-675b854866-45j42:/# curl --header "x-user: aline" http://nginx-service:8000 ; echo
 Diego A
 ```
