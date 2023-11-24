@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vs
+  labels:
+    app: nginx-vs
+spec:
+  hosts:
+    - nginx-service
+  http:
+    - fault:
+#        delay:
+#          fixedDelay: 10s
+#          percentage:
+#            value: 25
+        abort:
+          httpStatus: 503
+          percentage:
+            value: 25
+      route:
+        - destination:
+            host: nginx-service
+            subset: all
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: nginx-dr
+  labels:
+    app: nginx-dr
+spec:
+  host: nginx-service
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-user" # Esse 'x-user' pode ser qualquer valor;
+  subsets:
+    - name: all
+      labels:
+        app: nginx

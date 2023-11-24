@@ -501,3 +501,27 @@ Diego A
 ```
 
 ---
+
+## Fault Injection:
+
+O **Istio** fornece recursos avançados para gerenciar o tráfego entre serviços em um ambiente de malha de serviço. 
+A injeção de falhas é uma técnica importante no gerenciamento de resiliência, permitindo que você simule condições de falha para testar como seu sistema reage em 
+situações adversas. O Istio facilita a injeção de falhas com seu recurso de "Fault Injection" (Injeção de Falhas).
+
+Alguns dos principais aspectos da injeção de falhas no Istio incluem:
+
+- **Delay (Atraso)**: Você pode introduzir atrasos na comunicação entre serviços para simular latência de rede ou outros atrasos. 
+Isso ajuda a testar a resiliência do seu sistema em condições de rede menos ideais.
+
+- **Abort (Abortar)**: A injeção de falhas também permite que você simule falhas em uma solicitação, abortando a conexão entre serviços antes que a solicitação seja concluída. 
+Isso pode ser usado para simular falhas de serviço e verificar como o seu sistema se recupera.
+
+- **Retries (Retentativas)**: Você pode configurar políticas de retentativa que especificam se uma solicitação deve ser automaticamente retentada após uma falha.
+
+- **Circuit Breaking (Quebra de Circuito):** O Istio oferece controle sobre o circuit breaking, permitindo que você limite a quantidade de tráfego que um 
+serviço pode receber se ele estiver com falha.
+
+Para realizar a injeção de falhas com Istio, você normalmente usa o recurso de VirtualService para definir regras de tráfego e o 
+recurso de Fault Injection dentro do VirtualService para introduzir as condições de falha desejadas.
+
+---
