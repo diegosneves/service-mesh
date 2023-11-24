@@ -524,4 +524,51 @@ serviço pode receber se ele estiver com falha.
 Para realizar a injeção de falhas com Istio, você normalmente usa o recurso de VirtualService para definir regras de tráfego e o 
 recurso de Fault Injection dentro do VirtualService para introduzir as condições de falha desejadas.
 
+- Exemplo com **_Delay_**:
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vs
+  labels:
+    app: nginx-vs
+spec:
+  hosts:
+    - nginx-service
+  http:
+    - fault:
+        delay:
+          fixedDelay: 10s
+          percentage:
+            value: 25
+      route:
+        - destination:
+            host: nginx-service
+            subset: all
+```
+- Exemplo com **_Abort_**:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vs
+  labels:
+    app: nginx-vs
+spec:
+  hosts:
+    - nginx-service
+  http:
+    - fault:
+        abort:
+          httpStatus: 503
+          percentage:
+            value: 25
+      route:
+        - destination:
+            host: nginx-service
+            subset: all
+```
+
 ---
+
