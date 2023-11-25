@@ -615,8 +615,16 @@ Se um número significativo de erros consecutivos é detectado em uma instância
 essa instância pode ser temporariamente removida do pool, permitindo que o sistema se recupere e evite a degradação adicional devido a 
 instâncias de serviço com falha.
 
+### Testes:
+
+```shell
+kubectl exec fortio-deploy-5669d4866b-76wss -c fortio -- fortio load -c 2 -qps 0 -n 200 -loglevel Warning http://servicex-service
+```
+
+#### Kiali:
 ![circuit](src/resources/gifs/circuit-breaker.gif)
 
+- Ao identificar a falha,  mais de 97% das requisicoes foram direcionadas para o outro workload.
 ```textmate
 IP addresses distribution:
 10.43.43.62:80: 18
@@ -625,6 +633,118 @@ Code 200 : 195 (97.5 %)
 Response Header Sizes : count 200 avg 154.075 +/- 24.67 min 0 max 161 sum 30815
 Response Body/Total Sizes : count 200 avg 165.775 +/- 26.55 min 0 max 173 sum 33155
 All done 200 calls (plus 0 warmup) 251.379 ms avg, 8.0 qps
+```
+
+---
+
+## [Gateway](src/github/k8s/gateway.yaml):
+
+O recurso Gateway no Istio é usado para configurar o tráfego de entrada para a malha de serviço. 
+Ele define como o tráfego externo é roteado para os serviços internos do cluster Kubernetes.
+
+Aqui está uma explicação das partes-chave da configuração:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ingress-gateway-config
+  labels:
+    app: ingress-gateway-config
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: http2
+      hosts:
+        - "*"
+```
+
+- **name**: O nome do seu Gateway.
+
+- **selector**: O seletor que especifica os gateways que devem implementar essa configuração. 
+Neste caso, ele usa o valor padrão para o ingress gateway do Istio.
+
+- **servers**: Configuração para os servidores (portas) que o gateway deve escutar. Nesse caso, há apenas uma configuração para a porta 80.
+
+  - **port**: Configuração da porta.
+
+    - **number**: O número da porta (80 para HTTP neste caso).
+
+    - **name**: Nome da porta.
+
+    - **protocol**: Protocolo usado na porta (HTTP2 neste caso).
+
+  >_O **HTTP/2** é uma versão aprimorada do protocolo **HTTP**, que é amplamente utilizado para a comunicação entre clientes (geralmente navegadores da web) e servidores na Internet.
+  > O suporte ao **HTTP/2** é amplamente adotado em navegadores modernos e servidores da web. 
+  > Ele oferece melhor desempenho e eficiência em comparação com o **HTTP/1.x**, especialmente em cenários nos quais a latência da rede é um fator significativo._
+
+- **hosts**: Lista de hosts para os quais esse servidor deve responder. No seu exemplo, "\*" significa que este gateway vai responder para qualquer host. 
+Você pode substituir "\*" pelo domínio específico que você deseja, como "meu-site.com.br".
+
+Esta configuração basicamente diz ao Istio para encaminhar o tráfego HTTP na porta 80 para os serviços internos da malha de serviço que correspondem ao host especificado. 
+Certifique-se de ajustar o host de acordo com o domínio real que você deseja associar ao gateway.
+
+Além disso, para que essa configuração funcione corretamente, você precisará de um **VirtualService** que especifique como o tráfego deve ser roteado. 
+O **VirtualService** geralmente é vinculado ao Gateway. Certifique-se de criar ou ajustar o **VirtualService** conforme necessário para suas necessidades.
+
+---
+
+### Configuracao de peso:
+
+#### Peso - 50% por 50%:
+
+```yaml
+http:
+   - route:
+       - destination:
+           host: nginx-service
+           subset: v1
+         weight: 50
+       - destination:
+           host: nginx-service
+           subset: v2
+         weight: 50
+```
+![peso5050](src/resources/gifs/peso5050.gif)
+
+#### Peso - 90% por 10%:
+
+```yaml
+http:
+   - route:
+       - destination:
+           host: nginx-service
+           subset: v1
+         weight: 90
+       - destination:
+           host: nginx-service
+           subset: v2
+         weight: 10
+```
+![peso5050](src/resources/gifs/peso9010.gif)
+---
+
+### Configuracao Local:
+
+Para realizar os testes, foi necessario alterar a porta configurada no `istio-ingressgateway` para que o proxy do istio seja acessado, garantindo assim as configs criadas.
+
+para alterar a porta `30279`.
+```textmate
+NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                          AGE
+istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/TCP,80:30279/TCP,443:31788/TCP       4d21h
+```
+Foi utilizado o seguinte comando:
+
+```shell
+kubectl edit svc istio-ingressgateway -n istio-system
+```
+```textmate
+NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                                          AGE
+istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/TCP,80:30000/TCP,443:31788/TCP       4d22h
 ```
 
 ---

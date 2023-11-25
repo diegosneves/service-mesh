@@ -1,0 +1,64 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: ingress-gateway-config
+  labels:
+    app: ingress-gateway-config
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: http2
+      hosts:
+        - "*" # Aqui vai o dominio "meu-site.com.br"
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vs
+  labels:
+    app: nginx-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - ingress-gateway-config
+  http:
+    - route:
+        - destination:
+            host: nginx-service
+            subset: v1
+          weight: 50
+        - destination:
+            host: nginx-service
+            subset: v2
+          weight: 50
+
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: nginx-dr
+  labels:
+    app: nginx-dr
+spec:
+  host: nginx-service
+  trafficPolicy: # Essa linha de trafficPolicy nao é necessario se for usar o ROUND_ROBIN, pois esse algoritimo ja é o padrao.
+    loadBalancer: # O loadBalancer afeta os subsets que nao possuem uma config de trafficPolicy.
+      simple: ROUND_ROBIN # Esse envia trafico de forma igualitaria aos pods (Esse algoritimo afeta os subsets). Outra opcao é o RANDOM que envia o trafico aos pods de forma aleatoria.
+  subsets:
+    - name: v1
+      labels:
+        version: A
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_CONN # Esse algoritimo manda o trafico para os pods com menor fluxo.
+    - name: v2
+      labels:
+        version: B
