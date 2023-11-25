@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: circuit-break-servicex
+  labels:
+    app: circuit-break-servicex
+spec:
+  host: servicex-service # Tambem é possivel inserir o host desta forma: servicex-service.default.svc.cluster.local
+  trafficPolicy:
+    outlierDetection:
+#      consecutive5xxErrors: 10 # Essa config se aplica a todos os erros 5xx.
+      consecutiveGatewayErrors: 10 # Essa config se aplica apenas ao erros 502, 503 e 504.
+      interval: 5s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100

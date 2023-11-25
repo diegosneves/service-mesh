@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicex
+  labels:
+    app: servicex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: servicex
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: servicex
+        version: "200"
+    spec:
+      containers:
+        - name: nginx
+          image: diegoneves/server-py:latest
+          ports:
+            - containerPort: 8000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicex-error
+  labels:
+    app: servicex
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: servicex
+  template:
+    metadata:
+      name: nginx
+      labels:
+        app: servicex
+        version: "504"
+    spec:
+      containers:
+        - name: nginx
+          image: diegoneves/server-py:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: error
+              value: "yes"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: servicex-service
+spec:
+  type: ClusterIP
+  selector:
+    app: servicex
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000

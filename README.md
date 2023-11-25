@@ -572,3 +572,59 @@ spec:
 
 ---
 
+## Circuit Break:
+
+
+O Circuit Breaking, ou quebra de circuito, é uma técnica de gerenciamento de resiliência que visa evitar falhas catastróficas em sistemas distribuídos. O Istio oferece suporte ao Circuit Breaking como parte de suas funcionalidades avançadas de gerenciamento de tráfego na malha de serviço.
+
+A quebra de circuito no Istio funciona de maneira semelhante a um disjuntor elétrico. Se uma quantidade excessiva de solicitações para um serviço falhar ou levar muito tempo para ser processada, o Istio pode abrir o "circuito" para esse serviço, impedindo temporariamente que mais solicitações cheguem até ele. Isso evita que o serviço seja sobrecarregado e permite que ele se recupere.
+
+Alguns dos principais conceitos relacionados ao Circuit Breaking no Istio incluem:
+
+- **Thresholds (Limites)**: Você pode configurar limiares para métricas como taxa de erro e latência. Se esses limiares forem ultrapassados, o circuito é aberto.
+
+- **Sleep Windows (Janelas de Suspensão)**: Depois que o circuito é aberto, um "período de suspensão" é ativado, durante o qual todas as solicitações são automaticamente rejeitadas. Isso dá ao serviço tempo para se recuperar.
+
+- **Max Connections (Conexões Máximas)**: O Istio permite que você configure o número máximo de conexões simultâneas que um serviço pode aceitar antes de abrir o circuito.
+
+- **HTTP Delay (Atraso HTTP)**: Além de abrir o circuito, o Istio pode introduzir um atraso adicional nas respostas HTTP para simular um comportamento degradado.
+
+O recurso DestinationRule no Istio é usado para definir políticas de destino para o tráfego que é roteado para um serviço específico.
+
+```yaml
+  trafficPolicy:
+    outlierDetection:
+      consecutiveGatewayErrors: 10 # Essa config se aplica apenas ao erros 502, 503 e 504.
+      interval: 5s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 100
+```
+
+Vamos explicar cada uma dessas configurações:
+
+- **consecutiveGatewayErrors**: Esse campo configura o número de erros consecutivos que podem ocorrer antes que um host (instância do serviço) seja marcado como atípico. No exemplo, se houver 10 erros consecutivos (502, 503 ou 504), o Istio considerará essa instância do serviço como atípica.
+
+- **interval**: Este é o intervalo de tempo durante o qual o Istio contará os erros consecutivos. No exemplo, a contagem é redefinida a cada 5 segundos.
+
+- **baseEjectionTime**: Este campo configura o tempo mínimo que um host atípico será removido antes de ser considerado para reentrada no pool. No exemplo, um host será removido por no mínimo 30 segundos.
+
+- **maxEjectionPercent**: Este campo configura a porcentagem máxima de hosts que podem ser removidos do pool devido a serem considerados atípicos. No exemplo, 100% dos hosts podem ser removidos.
+
+Essas configurações são usadas para melhorar a resiliência do seu sistema em face de instâncias de serviço que estão se comportando mal. 
+Se um número significativo de erros consecutivos é detectado em uma instância de serviço dentro do intervalo especificado, 
+essa instância pode ser temporariamente removida do pool, permitindo que o sistema se recupere e evite a degradação adicional devido a 
+instâncias de serviço com falha.
+
+![circuit](src/resources/gifs/circuit-breaker.gif)
+
+```textmate
+IP addresses distribution:
+10.43.43.62:80: 18
+Code  -1 : 5 (2.5 %)
+Code 200 : 195 (97.5 %)
+Response Header Sizes : count 200 avg 154.075 +/- 24.67 min 0 max 161 sum 30815
+Response Body/Total Sizes : count 200 avg 165.775 +/- 26.55 min 0 max 173 sum 33155
+All done 200 calls (plus 0 warmup) 251.379 ms avg, 8.0 qps
+```
+
+---
