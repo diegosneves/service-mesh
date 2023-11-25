@@ -748,3 +748,74 @@ istio-ingressgateway   LoadBalancer   10.43.236.123   <pending>     15021:32400/
 ```
 
 ---
+
+## Trabalhando com prefixos:
+
+No **Istio**, o recurso `VirtualService` é usado para definir como o tráfego deve ser roteado para diferentes versões ou `subsets` de um serviço. 
+Nesse exemplo, usamos o campo **`uri`** com a opção **prefix** para definir diferentes rotas baseadas em prefixos.
+
+Vamos analisar a configuração:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-vs
+  labels:
+    app: nginx-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - ingress-gateway-config
+  http:
+    - match:
+        - uri:
+            prefix: "/b"
+        - route:
+            - destination:
+                host: nginx-service
+                subset: v2
+    - match:
+        - uri:
+            prefix: "/"
+        - route:
+            - destination:
+                host: nginx-service
+                subset: v1
+
+    - route:
+        - destination:
+            host: nginx-service
+            subset: v1
+          weight: 50
+        - destination:
+            host: nginx-service
+            subset: v2
+          weight: 50
+```
+
+- **hosts: [`"*"`]**: Este `VirtualService` se aplica a todos os hosts.
+
+- **gateways: [`ingress-gateway-config`]**: Este `VirtualService` está vinculado ao Gateway chamado `ingress-gateway-config`.
+
+- Rotas baseadas em Prefixo:
+
+  - **uri**: **prefix: `"/b"`**: Esta regra aplica-se a solicitações cujo caminho começa com `"/b"`. 
+Se um pedido corresponder a isso, ele será roteado para a versão `v2` do serviço `nginx-service`.
+
+  - **uri: prefix: `"/"`**: Esta regra aplica-se a solicitações cujo caminho é qualquer coisa que não comece com `"/b"`. 
+Se um pedido corresponder a isso, ele será roteado para a versão `v1` do serviço `nginx-service`.
+
+- **route:**: Esta é a parte onde as rotas são definidas. As rotas são selecionadas com base nas correspondências acima.
+
+  - Para o prefixo `"/b"`, a solicitação será roteada para a versão `v2` do serviço `nginx-service`.
+
+  - Para qualquer outro prefixo (ou nenhum prefixo), a solicitação será roteada para a versão `v1` do serviço `nginx-service`.
+
+  - A última seção define um balanceamento de carga ponderado de `50%` para cada versão (`v1` e `v2`).
+
+Este exemplo ilustra como usar prefixos no campo `uri` para criar rotas diferentes com base nos caminhos das solicitações. 
+Certifique-se de ajustar conforme necessário com base nos requisitos específicos do seu aplicativo.
+
+---
